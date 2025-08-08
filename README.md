@@ -141,15 +141,17 @@ docker-compose up --build
 
 ## 🧪 Test Instructions
 
-Each service has unit tests for its core functionalities.
+Each service has unit tests for its core functionalities. Before running this, install yarn in your machine.
 
 ### Run Tests:
 
 ```bash
 # Inside user-service/
+yarn
 yarn test
 
 # Inside todo-service/
+yarn
 yarn test
 ```
 

@@ -47,7 +47,7 @@ describe("register", () => {
     expect(next).toHaveBeenCalled();
     const error = next.mock.calls[0][0];
     expect(error.status).toBe(400);
-    expect(error.message).toBe("Invalid input");
+    expect(error.message).toBe("Invalid input: provide a valid email and a password with at least 6 characters");
   });
 
   it("should return 409 if email already exists", async () => {
