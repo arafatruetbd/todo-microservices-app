@@ -5,6 +5,7 @@ import {
   updateTodoService,
   deleteTodoService,
 } from "../services/todoService";
+import { UnauthorizedError } from "../helper/error";
 
 // Controller to handle creating a new todo item.
 // Extracts content from request body and user_uuid from the authenticated user.
@@ -17,7 +18,10 @@ export const createTodo = async (
 ) => {
   try {
     const { content } = req.body;
-    const { user_uuid } = (req as any).user;
+    const user_uuid = (req as any).user?.user_uuid;
+    if (!user_uuid) {
+      throw new UnauthorizedError();
+    }
     const todo = await createTodoService(user_uuid, content);
     res.status(201).json(todo);
   } catch (err) {
@@ -34,7 +38,10 @@ export const getTodos = async (
   next: NextFunction
 ) => {
   try {
-    const { user_uuid } = (req as any).user;
+    const user_uuid = (req as any).user?.user_uuid;
+    if (!user_uuid) {
+      throw new UnauthorizedError();
+    }
     const todos = await getTodosService(user_uuid);
     res.status(200).json(todos);
   } catch (err) {
@@ -54,7 +61,10 @@ export const updateTodo = async (
   try {
     const { uuid } = req.params;
     const { content } = req.body;
-    const { user_uuid } = (req as any).user;
+    const user_uuid = (req as any).user?.user_uuid;
+    if (!user_uuid) {
+      throw new UnauthorizedError();
+    }
     const updatedTodo = await updateTodoService(uuid, user_uuid, content);
     res.status(200).json(updatedTodo);
   } catch (err) {
@@ -72,7 +82,10 @@ export const deleteTodo = async (
 ) => {
   try {
     const { uuid } = req.params;
-    const { user_uuid } = (req as any).user;
+    const user_uuid = (req as any).user?.user_uuid;
+    if (!user_uuid) {
+      throw new UnauthorizedError();
+    }
     await deleteTodoService(uuid, user_uuid);
     res.status(204).send();
   } catch (err) {

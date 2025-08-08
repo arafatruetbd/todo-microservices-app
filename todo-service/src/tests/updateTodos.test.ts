@@ -1,6 +1,10 @@
 import { updateTodo } from "../controllers/todoController";
 import { getTodoRepo } from "../helper/todoRepository";
-import { NotFoundError, ForbiddenError } from "../helper/error";
+import {
+  NotFoundError,
+  ForbiddenError,
+  UnauthorizedError,
+} from "../helper/error";
 
 jest.mock("../helper/todoRepository");
 
@@ -93,6 +97,24 @@ describe("updateTodo", () => {
 
     expect(mockRepo.findOneBy).toHaveBeenCalledWith({ uuid: "todo-123" });
     expect(next).toHaveBeenCalledWith(expect.any(ForbiddenError));
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.json).not.toHaveBeenCalled();
+  });
+
+  // New test case for missing or invalid JWT
+  it("should call next with UnauthorizedError if user is missing (JWT missing or invalid)", async () => {
+    req = {
+      params: { uuid: "todo-123" },
+      body: { content: "New content" },
+      user: undefined, // simulate missing user
+    };
+
+    await updateTodo(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+    const err = next.mock.calls[0][0];
+    expect(err).toBeInstanceOf(UnauthorizedError);
+
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
   });

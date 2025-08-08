@@ -15,3 +15,10 @@ export class ForbiddenError extends Error {
     this.name = "ForbiddenError"; // Set error name for easier identification
   }
 }
+
+export class UnauthorizedError extends Error {
+  constructor(message = "Unauthorized") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
