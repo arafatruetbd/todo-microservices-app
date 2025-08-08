@@ -1,0 +1,221 @@
+{
+	"info": {
+		"_postman_id": "cd40b02d-e7d3-41dd-b9dc-bb8e3bf45a31",
+		"name": "AICI_TODO",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11752735"
+	},
+	"item": [
+		{
+			"name": "User_Service",
+			"item": [
+				{
+					"name": "Register a user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\":\"test1@example.com\", \"password\":\"123456\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "## Register User\n\nThis endpoint allows new users to register by providing their email and password. Upon successful registration, a token will be returned, which can be used for subsequent authenticated requests.\n\n### Request\n\n- **Method:** POST\n    \n- **URL:** `{{base_url}}/api/auth/register`\n    \n- **Content-Type:** application/json\n    \n\n#### Request Body\n\nThe request body must be a JSON object containing the following parameters:\n\n- **email** (string): The email address of the user. This will be used for authentication and communication.\n    \n- **password** (string): The password chosen by the user for their account. It should meet security requirements.\n    \n\n##### Example Request Body\n\n``` json\n{\n  \"email\": \"test12@example.com\",\n  \"password\": \"123456\"\n}\n\n ```\n\n### Response\n\n- **Status Code:** 201 Created\n    \n- **Content-Type:** application/json\n    \n\n#### Response Body\n\nOn successful registration, the response will contain a JSON object with the following structure:\n\n- **token** (string): A token that can be used for authentication in future requests.\n    \n\n##### Example Response Body\n\n``` json\n{\n  \"token\": \"\"\n}\n\n ```\n\n### Summary\n\nThis endpoint is essential for user registration, ensuring that users can create accounts and receive a token for authenticated interactions with the API."
+					},
+					"response": []
+				},
+				{
+					"name": "Login and get JWT",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\":\"test@example.com\", \"password\":\"123456\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "## Login API Endpoint\n\nThis endpoint is used to authenticate a user and obtain an access token.\n\n### Request\n\n- **Method**: POST\n    \n- **URL**: `{{base_url}}/api/auth/login`\n    \n\n#### Request Body\n\nThe request body must be in JSON format and include the following parameters:\n\n- **email** (string): The email address of the user attempting to log in.\n    \n- **password** (string): The password associated with the user's account.\n    \n\n**Example Request Body:**\n\n``` json\n{\n  \"email\": \"test@example.com\",\n  \"password\": \"123456\"\n}\n\n ```\n\n### Response\n\nUpon successful authentication, the server responds with a status code of `200` and returns a JSON object containing:\n\n- **token** (string): The access token that can be used for subsequent requests to protected resources.\n    \n\n**Example Response:**\n\n``` json\n{\n  \"token\": \"\"\n}\n\n ```\n\n### Notes\n\n- Ensure that the email and password provided are correct to avoid authentication failures.\n    \n- The returned token should be stored securely and included in the Authorization header for future requests to protected endpoints."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Todo_Service",
+			"item": [
+				{
+					"name": "Create Todo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"content\":\"My first todo\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url }}",
+							"host": [
+								"{{base_url }}"
+							]
+						},
+						"description": "## Add Todo Item\n\nThis endpoint allows users to create a new todo item by sending a POST request.\n\n### Request\n\n- **Method**: `POST`\n    \n- **Endpoint**: `{{base_url}}`\n    \n\n#### Request Body\n\nThe request body must be in JSON format and include the following parameter:\n\n- `content` (string): The content of the todo item that you want to add.\n    \n\n**Example**:\n\n``` json\n{\n  \"content\": \"My first todo\"\n}\n\n ```\n\n### Response\n\nUpon successful creation of the todo item, the server will respond with a status code of `201 Created` and a JSON object containing the following fields:\n\n- `content` (string): The content of the todo item (may be empty in the response).\n    \n- `user_uuid` (string): The UUID of the user who created the todo item (may be empty in the response).\n    \n- `id` (integer): The unique identifier for the todo item (may be 0 in the response).\n    \n- `uuid` (string): The UUID of the todo item (may be empty in the response).\n    \n\n**Example Response**:\n\n``` json\n{\n  \"content\": \"\",\n  \"user_uuid\": \"\",\n  \"id\": 0,\n  \"uuid\": \"\"\n}\n\n ```\n\n### Notes\n\n- Ensure that the content parameter is provided in the request body for the todo item to be created successfully.\n    \n- The response will include identifiers that can be used for further operations on the todo item."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Todos",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url }}",
+							"host": [
+								"{{base_url }}"
+							]
+						},
+						"description": "### Endpoint Description\n\nThis endpoint retrieves a list of resources from the server. The response includes an array of objects, each representing a resource with specific attributes.\n\n### Request Parameters\n\n- **Method**: GET\n    \n- **URL**: `{{base_url}}`\n    \n\n### Expected Response\n\n- **Status Code**: 200 OK\n    \n- **Content-Type**: application/json\n    \n- **Response Body**:\n    \n    - An array of objects, where each object contains:\n        \n        - **id** (integer): The unique identifier for the resource.\n            \n        - **uuid** (string): A universally unique identifier associated with the resource.\n            \n        - **content** (string): The content of the resource.\n            \n        - **user_uuid** (string): The UUID of the user associated with the resource.\n            \n\n### Notes\n\n- Ensure that the base URL is correctly set to access the desired resources.\n    \n- The response will return an empty array if no resources are found.\n    \n- This endpoint is useful for retrieving a list of resources for further processing or display in an application."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Todo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"content\":\"2nd Todo\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url }}/f6ff5d81-1aea-48c1-81b3-4d3c79c995aa",
+							"host": [
+								"{{base_url }}"
+							],
+							"path": [
+								"f6ff5d81-1aea-48c1-81b3-4d3c79c995aa"
+							]
+						},
+						"description": "## Update Todo Item\n\nThis endpoint allows you to update an existing todo item identified by its unique UUID. By sending a PUT request to the specified URL, you can modify the content of the todo item.\n\n### Request\n\n- **Method**: PUT\n    \n- **URL**: `{{base_url}}/8100a380-6308-4e93-8d68-7ae68bd479b5`\n    \n\n#### Request Body\n\nThe request body must be in JSON format and should include the following parameter:\n\n- **content** (string): The updated content of the todo item. This is a required field.\n    \n\n**Example Request Body:**\n\n``` json\n{\n  \"content\": \"2nd Todo\"\n}\n\n ```\n\n### Response\n\nOn a successful update, the response will return a status code of `200` along with a JSON object containing the following fields:\n\n- **id** (integer): The identifier of the todo item.\n    \n- **uuid** (string): The unique identifier of the todo item.\n    \n- **content** (string): The updated content of the todo item.\n    \n- **user_uuid** (string): The UUID of the user associated with the todo item.\n    \n\n**Example Response:**\n\n``` json\n{\n  \"id\": 0,\n  \"uuid\": \"\",\n  \"content\": \"\",\n  \"user_uuid\": \"\"\n}\n\n ```\n\n### Notes\n\n- Ensure that the UUID in the URL corresponds to an existing todo item; otherwise, the request may result in an error.\n    \n- The response will return the updated details of the todo item, confirming the changes made."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Todo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url }}/8100a380-6308-4e93-8d68-7ae68bd479b5",
+							"host": [
+								"{{base_url }}"
+							],
+							"path": [
+								"8100a380-6308-4e93-8d68-7ae68bd479b5"
+							]
+						},
+						"description": "### DELETE Request to Remove a Resource\n\nThis endpoint allows you to delete a specific resource identified by its unique identifier.\n\n- **Method**: `DELETE`\n    \n- **Endpoint**: `{{base_url }}/8100a380-6308-4e93-8d68-7ae68bd479b5`\n    \n\n#### Request Parameters\n\n- **Path Parameter**:\n    \n    - `id` (UUID): The unique identifier of the resource to be deleted. In this case, it is `8100a380-6308-4e93-8d68-7ae68bd479b5`.\n        \n\n#### Expected Response\n\n- **Status Code**: `204 No Content`\n    \n    - This indicates that the request was successful and the resource has been deleted. No additional content will be returned in the response body.\n        \n- **Content-Type**: `text/xml`\n    \n    - The response content type is specified as XML, although no content will be present.\n        \n\n### Summary\n\nUse this endpoint to delete a resource by its unique identifier. A successful deletion will result in a `204 No Content` response, confirming that the resource has been removed."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

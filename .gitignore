@@ -1,0 +1,26 @@
+# Ignore node_modules folders in client, user-service, and todo-service
+client/node_modules/
+user-service/node_modules/
+todo-service/node_modules/
+
+# Ignore all coverage folders anywhere in the project
+coverage/
+
+# Ignore all .env files
+*.env
+
+# Ignore logs
+logs/
+*.log
+npm-debug.log*
+
+# Ignore build output folders
+dist/
+build/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore VS Code settings folder
+.vscode/

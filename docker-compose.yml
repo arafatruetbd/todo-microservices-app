@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  user-service:
+    build: ./user-service
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=user-db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${USER_DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - user-db
+
+  user-db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${USER_DB_NAME}
+    ports:
+      - "${USER_DB_PORT}:5432"
+    volumes:
+      - user_data:/var/lib/postgresql/data
+
+  todo-service:
+    build: ./todo-service
+    ports:
+      - "5001:5001"
+    environment:
+      - DB_HOST=todo-db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${TODO_DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - todo-db
+
+  todo-db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${TODO_DB_NAME}
+    ports:
+      - "${TODO_DB_PORT}:5432"
+    volumes:
+      - todo_data:/var/lib/postgresql/data
+
+  frontend:
+    build: ./client
+    ports:
+      - "3000:80"
+    depends_on:
+      - user-service
+      - todo-service
+
+volumes:
+  user_data:
+  todo_data:
