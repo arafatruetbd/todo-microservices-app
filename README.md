@@ -6,9 +6,9 @@ This repository contains a full-stack application built to demonstrate skills in
 
 The goal is to develop a simple system composed of:
 
-* Two backend services with databases
-* One minimal frontend
-* All components containerized with Docker and orchestrated using Docker Compose
+- Two backend services with databases
+- One minimal frontend
+- All components containerized with Docker and orchestrated using Docker Compose
 
 ---
 
@@ -16,32 +16,32 @@ The goal is to develop a simple system composed of:
 
 ### Backend
 
-* Node.js  
-* TypeScript  
-* Express.js  
-* PostgreSQL (via `pg` library)  
-* TypeORM (Object–Relational Mapping)  
-* JWT (JSON Web Token) authentication  
-* CORS support  
-* Jest + Supertest (unit & integration testing)  
+- Node.js
+- TypeScript
+- Express.js
+- PostgreSQL (via `pg` library)
+- TypeORM (Object–Relational Mapping)
+- JWT (JSON Web Token) authentication
+- CORS support
+- Jest + Supertest (unit & integration testing)
 
 ### Frontend (Optional):
 
- * Vite – Lightning-fast development server and build tool
- * React 19 – Component-based UI framework
- * TypeScript – Static typing for JavaScript
- * Tailwind CSS – Utility-first CSS framework
- * Redux Toolkit – Simplified global state management 
- * React Hook Form – Forms with built-in validation and performance
- * React Router v7 – Declarative routing for React apps
- * React Hot Toast – Beautiful, customizable toast notifications
- * ESLint – Code quality and linting
- * Vite Plugin React – Fast refresh and React-specific optimizations
+- Vite – Lightning-fast development server and build tool
+- React 19 – Component-based UI framework
+- TypeScript – Static typing for JavaScript
+- Tailwind CSS – Utility-first CSS framework
+- Redux Toolkit – Simplified global state management
+- React Hook Form – Forms with built-in validation and performance
+- React Router v7 – Declarative routing for React apps
+- React Hot Toast – Beautiful, customizable toast notifications
+- ESLint – Code quality and linting
+- Vite Plugin React – Fast refresh and React-specific optimizations
 
 ### DevOps:
 
-* Docker
-* Docker Compose
+- Docker
+- Docker Compose
 
 ---
 
@@ -73,11 +73,25 @@ root/
 ### 1. Clone the Repository
 
 ```bash
-git clone <repo-url>
-cd <repo-name>
+git clone https://github.com/arafatruetbd/todo-microservices-app.git
+cd todo-microservices-app
 ```
 
 ### 2. Build and Run with Docker Compose
+
+Before running the commands below, please ensure you have **Docker** and **Docker Compose** installed on your system.
+
+- **Install Docker:**  
+  Follow the official guide here: [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
+
+- **Verify Docker Compose installation:**  
+   Docker Desktop comes with Docker Compose included. To verify, run:
+  ```bash
+   docker-compose --version
+  ```
+  If Docker Compose is not installed, follow the instructions here: https://docs.docker.com/compose/install/
+
+Once Docker and Docker Compose are installed, build and start all services with:
 
 ```bash
 docker-compose up --build
@@ -85,17 +99,17 @@ docker-compose up --build
 
 ### 3. Access the Services
 
-* **Frontend**: [http://localhost:3000](http://localhost:3000)
-* **User API**: [http://localhost:5000](http://localhost:5000)
-* **Todo API**: [http://localhost:5001](http://localhost:5001)
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **User API**: [http://localhost:5000](http://localhost:5000)
+- **Todo API**: [http://localhost:5001](http://localhost:5001)
 
 ---
 
 ## 🔐 Authentication Flow
 
-* Users can register and login via the User Service
-* On successful login, a JWT is returned
-* Todo Service validates JWT for all requests
+- Users can register and login via the User Service
+- On successful login, a JWT is returned
+- Todo Service validates JWT for all requests
 
 ---
 
@@ -107,10 +121,10 @@ Each service has unit tests for its core functionalities.
 
 ```bash
 # Inside user-service/
-yarn test
+yarn test:coverage
 
 # Inside todo-service/
-yarn test
+yarn test:coverage
 ```
 
 ---
@@ -119,10 +133,9 @@ yarn test
 
 Available via:
 
-* Postman Collection (in `/docs/postman_collection.json`)
+- Postman Collection (in `/docs/postman_collection.json`)
 
 ---
-
 
 ## ✅ User Stories Covered
 
@@ -142,11 +155,11 @@ Available via:
 
 ## 🧼 Best Practices
 
-* Passwords are hashed using bcrypt
-* JWT includes user UUID and expires appropriately
-* All APIs are RESTful and secure
-* CORS and environment configs are managed cleanly
-* Fully containerized microservices with isolated responsibilities
+- Passwords are hashed using bcrypt
+- JWT includes user UUID and expires appropriately
+- All APIs are RESTful and secure
+- CORS and environment configs are managed cleanly
+- Fully containerized microservices with isolated responsibilities
 
 ---
 
