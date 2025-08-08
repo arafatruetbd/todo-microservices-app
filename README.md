@@ -77,7 +77,33 @@ git clone https://github.com/arafatruetbd/todo-microservices-app.git
 cd todo-microservices-app
 ```
 
-### 2. Build and Run with Docker Compose
+### 2. Environment Variables
+
+Create a .env file in the root directory of this project. This file stores sensitive configuration values for your databases and JWT authentication.
+
+```env
+# =========================
+# Database Configuration
+# =========================
+DB_USER=postgres
+DB_PASS=password
+
+# Database Names
+USER_DB_NAME=user_db
+TODO_DB_NAME=todo_db
+
+# Host Ports (host:container mapping)
+USER_DB_PORT=5440   # Host port for User DB (maps to container 5432)
+TODO_DB_PORT=5441   # Host port for Todo DB (maps to container 5432)
+
+# =========================
+# JWT Authentication
+# =========================
+JWT_SECRET=your_jwt_secret_here
+
+```
+
+### 3. Build and Run with Docker Compose
 
 Before running the commands below, please ensure you have **Docker** and **Docker Compose** installed on your system.
 
@@ -97,7 +123,7 @@ Once Docker and Docker Compose are installed, build and start all services with:
 docker-compose up --build
 ```
 
-### 3. Access the Services
+### 4. Access the Services
 
 - **Frontend**: [http://localhost:3000](http://localhost:3000)
 - **User API**: [http://localhost:5000](http://localhost:5000)
@@ -160,34 +186,6 @@ Available via:
 - All APIs are RESTful and secure
 - CORS and environment configs are managed cleanly
 - Fully containerized microservices with isolated responsibilities
-
----
-
-## 📦 Environment Variables
-
-Create a .env file in the root directory of this project. This file stores sensitive configuration values for your databases and JWT authentication.
-
-```env
-# =========================
-# Database Configuration
-# =========================
-DB_USER=postgres
-DB_PASS=password
-
-# Database Names
-USER_DB_NAME=user_db
-TODO_DB_NAME=todo_db
-
-# Host Ports (host:container mapping)
-USER_DB_PORT=5440   # Host port for User DB (maps to container 5432)
-TODO_DB_PORT=5441   # Host port for Todo DB (maps to container 5432)
-
-# =========================
-# JWT Authentication
-# =========================
-JWT_SECRET=your_jwt_secret_here
-
-```
 
 ---
 
