@@ -121,10 +121,10 @@ Each service has unit tests for its core functionalities.
 
 ```bash
 # Inside user-service/
-yarn test:coverage
+yarn test
 
 # Inside todo-service/
-yarn test:coverage
+yarn test
 ```
 
 ---

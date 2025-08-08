@@ -31,7 +31,7 @@ describe("getTodos", () => {
     ];
     mockRepo.find.mockResolvedValue(todos);
 
-    await getTodos(req, res);
+    await getTodos(req, res, jest.fn());
 
     expect(mockRepo.find).toHaveBeenCalledWith({
       where: { user_uuid: "user-123" },
@@ -43,7 +43,7 @@ describe("getTodos", () => {
   it("should return 200 with an empty array if no todos", async () => {
     mockRepo.find.mockResolvedValue([]);
 
-    await getTodos(req, res);
+    await getTodos(req, res, jest.fn());
 
     expect(mockRepo.find).toHaveBeenCalledWith({
       where: { user_uuid: "user-123" },

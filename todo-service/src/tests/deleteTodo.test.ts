@@ -1,5 +1,6 @@
 import { deleteTodo } from "../controllers/todoController";
 import { getTodoRepo } from "../helper/todoRepository";
+import { NotFoundError, ForbiddenError } from "../helper/error";
 
 jest.mock("../helper/todoRepository");
 
@@ -7,6 +8,7 @@ describe("deleteTodo", () => {
   let mockRepo: any;
   let req: any;
   let res: any;
+  let next: jest.Mock;
 
   beforeEach(() => {
     mockRepo = {
@@ -20,6 +22,8 @@ describe("deleteTodo", () => {
       json: jest.fn(),
       send: jest.fn(),
     };
+
+    next = jest.fn();
   });
 
   it("should delete todo if user owns it and return 204", async () => {
@@ -35,17 +39,18 @@ describe("deleteTodo", () => {
     };
 
     mockRepo.findOneBy.mockResolvedValue(todo);
-    mockRepo.remove.mockResolvedValue(undefined); // usually remove returns void or undefined
+    mockRepo.remove.mockResolvedValue(undefined);
 
-    await deleteTodo(req, res);
+    await deleteTodo(req, res, next);
 
     expect(mockRepo.findOneBy).toHaveBeenCalledWith({ uuid: "todo-123" });
     expect(mockRepo.remove).toHaveBeenCalledWith(todo);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.send).toHaveBeenCalled();
+    expect(next).not.toHaveBeenCalled();
   });
 
-  it("should return 404 if todo does not exist", async () => {
+  it("should call next with NotFoundError if todo does not exist", async () => {
     req = {
       params: { uuid: "todo-123" },
       user: { user_uuid: "user-123" },
@@ -53,14 +58,15 @@ describe("deleteTodo", () => {
 
     mockRepo.findOneBy.mockResolvedValue(null);
 
-    await deleteTodo(req, res);
+    await deleteTodo(req, res, next);
 
     expect(mockRepo.findOneBy).toHaveBeenCalledWith({ uuid: "todo-123" });
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ message: "Not found" });
+    expect(next).toHaveBeenCalledWith(expect.any(NotFoundError));
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.json).not.toHaveBeenCalled();
   });
 
-  it("should return 403 if user does not own the todo", async () => {
+  it("should call next with ForbiddenError if user does not own the todo", async () => {
     const todo = {
       uuid: "todo-123",
       user_uuid: "user-456", // different user
@@ -74,10 +80,11 @@ describe("deleteTodo", () => {
 
     mockRepo.findOneBy.mockResolvedValue(todo);
 
-    await deleteTodo(req, res);
+    await deleteTodo(req, res, next);
 
     expect(mockRepo.findOneBy).toHaveBeenCalledWith({ uuid: "todo-123" });
-    expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.json).toHaveBeenCalledWith({ message: "Forbidden" });
+    expect(next).toHaveBeenCalledWith(expect.any(ForbiddenError));
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.json).not.toHaveBeenCalled();
   });
 });

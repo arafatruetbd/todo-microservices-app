@@ -1,42 +1,44 @@
-import { Request, Response } from "express";
-import { AppDataSource } from "../db";
-import { User } from "../entity/User";
-import bcrypt from "bcryptjs";
-import { generateToken } from "../utils/jwt";
+import { Request, Response, NextFunction } from "express";
+import { registerUser, loginUser } from "../services/authService";
 
-export const register = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+// Controller function to handle user registration
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Extract email and password from request body
+    const { email, password } = req.body;
 
-  if (!email || password.length < 6)
-    return res.status(400).json({ message: "Invalid input" });
+    // Call the service function to register user and generate token
+    const token = await registerUser(email, password);
 
-  const repo = AppDataSource.getRepository(User);
-  const existing = await repo.findOneBy({ user_email: email });
-  if (existing) return res.status(409).json({ message: "Email in use" });
-
-  const hash = await bcrypt.hash(password, 10);
-  const user = repo.create({ user_email: email, user_pwd: hash });
-  const savedUser = await repo.save(user);
-
-  const token = generateToken({
-    user_uuid: savedUser.uuid,
-    email: savedUser.user_email,
-  });
-
-  return res.status(201).json({ token });
+    // Respond with HTTP 201 Created and the token
+    res.status(201).json({ token });
+  } catch (error) {
+    // Pass any errors to centralized error handling middleware
+    next(error);
+  }
 };
 
-export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+// Controller function to handle user login
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Extract email and password from request body
+    const { email, password } = req.body;
 
-  const repo = AppDataSource.getRepository(User);
-  const user = await repo.findOneBy({ user_email: email });
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    // Call the service function to login user and generate token
+    const token = await loginUser(email, password);
 
-  const valid = await bcrypt.compare(password, user.user_pwd);
-  if (!valid) return res.status(401).json({ message: "Invalid credentials" });
-
-  const token = generateToken({ user_uuid: user.uuid, email: user.user_email });
-
-  return res.status(200).json({ token });
+    // Respond with HTTP 200 OK and the token
+    res.status(200).json({ token });
+  } catch (error) {
+    // Pass any errors to centralized error handling middleware
+    next(error);
+  }
 };

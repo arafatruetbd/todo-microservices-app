@@ -1,9 +1,9 @@
 import { register } from "../controllers/authController";
-import { AppDataSource } from "../db";
+import { AppDataSource } from "../config/db";
 import bcrypt from "bcryptjs";
 import * as jwtUtils from "../utils/jwt";
 
-jest.mock("../db.ts", () => ({
+jest.mock("../config/db", () => ({
   AppDataSource: {
     getRepository: jest.fn(),
   },
@@ -40,19 +40,27 @@ describe("register", () => {
 
   it("should return 400 if email missing or password too short", async () => {
     req.body = { email: "", password: "123" };
-    await register(req, res);
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ message: "Invalid input" });
+
+    const next = jest.fn();
+    await register(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+    const error = next.mock.calls[0][0];
+    expect(error.status).toBe(400);
+    expect(error.message).toBe("Invalid input");
   });
 
   it("should return 409 if email already exists", async () => {
     req.body = { email: "test@example.com", password: "123456" };
     mockRepo.findOneBy.mockResolvedValue({ user_email: "test@example.com" });
 
-    await register(req, res);
+    const next = jest.fn();
+    await register(req, res, next);
 
-    expect(res.status).toHaveBeenCalledWith(409);
-    expect(res.json).toHaveBeenCalledWith({ message: "Email in use" });
+    expect(next).toHaveBeenCalled();
+    const error = next.mock.calls[0][0];
+    expect(error.status).toBe(409);
+    expect(error.message).toBe("Email in use");
   });
 
   it("should create user, hash password and return token", async () => {
@@ -67,7 +75,7 @@ describe("register", () => {
       user_email: "new@example.com",
     });
 
-    await register(req, res);
+    await register(req, res, jest.fn());
 
     expect(bcrypt.hash).toHaveBeenCalledWith("123456", 10);
     expect(mockRepo.create).toHaveBeenCalledWith({

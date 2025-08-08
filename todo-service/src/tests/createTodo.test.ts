@@ -38,7 +38,7 @@ describe("createTodo", () => {
     mockRepo.create.mockReturnValue(createdTodo);
     mockRepo.save.mockResolvedValue(createdTodo);
 
-    await createTodo(req, res);
+    await createTodo(req, res, jest.fn());
 
     expect(mockRepo.create).toHaveBeenCalledWith({
       content: "Test todo",

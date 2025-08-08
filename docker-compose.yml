@@ -1,6 +1,22 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  user-db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${USER_DB_NAME}
+    ports:
+      - "${USER_DB_PORT}:5432"
+    volumes:
+      - user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${USER_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   user-service:
     build: ./user-service
     ports:
@@ -13,18 +29,24 @@ services:
       - DB_NAME=${USER_DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - user-db
+      user-db:
+        condition: service_healthy
 
-  user-db:
+  todo-db:
     image: postgres
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_DB: ${TODO_DB_NAME}
     ports:
-      - "${USER_DB_PORT}:5432"
+      - "${TODO_DB_PORT}:5432"
     volumes:
-      - user_data:/var/lib/postgresql/data
+      - todo_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${TODO_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   todo-service:
     build: ./todo-service
@@ -38,18 +60,8 @@ services:
       - DB_NAME=${TODO_DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - todo-db
-
-  todo-db:
-    image: postgres
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${TODO_DB_NAME}
-    ports:
-      - "${TODO_DB_PORT}:5432"
-    volumes:
-      - todo_data:/var/lib/postgresql/data
+      todo-db:
+        condition: service_healthy
 
   frontend:
     build: ./client

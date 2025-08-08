@@ -1,9 +1,9 @@
 import { login } from "../controllers/authController";
-import { AppDataSource } from "../db";
+import { AppDataSource } from "../config/db";
 import bcrypt from "bcryptjs";
 import * as jwtUtils from "../utils/jwt";
 
-jest.mock("../db.ts", () => ({
+jest.mock("../config/db", () => ({
   AppDataSource: {
     getRepository: jest.fn(),
   },
@@ -40,10 +40,13 @@ describe("login", () => {
     req.body = { email: "notfound@example.com", password: "password123" };
     mockRepo.findOneBy.mockResolvedValue(null);
 
-    await login(req, res);
+    const next = jest.fn();
+    await login(req, res, next);
 
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ message: "Invalid credentials" });
+    expect(next).toHaveBeenCalled();
+    const error = next.mock.calls[0][0];
+    expect(error.status).toBe(401);
+    expect(error.message).toBe("Invalid credentials");
   });
 
   it("should return 401 if password is invalid", async () => {
@@ -55,14 +58,18 @@ describe("login", () => {
     });
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-    await login(req, res);
+    const next = jest.fn();
+    await login(req, res, next);
 
     expect(bcrypt.compare).toHaveBeenCalledWith(
       "wrongpassword",
       "hashedPassword"
     );
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ message: "Invalid credentials" });
+
+    expect(next).toHaveBeenCalled();
+    const error = next.mock.calls[0][0];
+    expect(error.status).toBe(401);
+    expect(error.message).toBe("Invalid credentials");
   });
 
   it("should return 200 and token if credentials are valid", async () => {
@@ -75,7 +82,7 @@ describe("login", () => {
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (jwtUtils.generateToken as jest.Mock).mockReturnValue("fake-token");
 
-    await login(req, res);
+    await login(req, res, jest.fn());
 
     expect(bcrypt.compare).toHaveBeenCalledWith(
       "correctpassword",
