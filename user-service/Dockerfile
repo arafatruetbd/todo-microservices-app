@@ -1,17 +1,19 @@
-# Use a smaller Node.js base image
+# Use a smaller Node.js base image for build stage
 FROM node:20-alpine AS build
 
 # Set working directory
 WORKDIR /app
 
-# Install dependencies only for production build
+# Copy package.json and package-lock.json first
 COPY package*.json ./
-RUN npm ci --only=production
+
+# Install all dependencies (prod + dev) for build
+RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application (needs dev dependencies for TypeScript)
 RUN npm run build
 
 # --------- Production Stage ---------
@@ -26,11 +28,13 @@ RUN apk add --no-cache curl
 RUN curl -L https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-alpine-linux-amd64-v0.6.1.tar.gz \
   | tar -C /usr/local/bin -xzv
 
-# Copy only built files and production dependencies
+# Copy only package.json and package-lock.json
 COPY package*.json ./
+
+# Install production dependencies only
 RUN npm ci --only=production
 
-# Copy build output from previous stage
+# Copy build output from build stage
 COPY --from=build /app/dist ./dist
 
 # Expose port

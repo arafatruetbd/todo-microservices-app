@@ -3,9 +3,9 @@ FROM node:20-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Install dependencies first (better caching)
+# Install all dependencies (prod + dev) for build
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copy source files
 COPY . .
@@ -34,5 +34,5 @@ RUN npm ci --only=production
 
 EXPOSE 5001
 
-# Wait for DB before starting app - change host:port accordingly
+# Wait for DB before starting app - adjust host and port as needed
 CMD ["dockerize", "-wait", "tcp://todo-db:5432", "-timeout", "60s", "node", "dist/server.js"]
