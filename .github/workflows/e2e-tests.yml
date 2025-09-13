@@ -18,33 +18,33 @@ jobs:
         with:
           node-version: 20
 
-      # 3. Install dependencies
-      # Install root deps (needed to build services) + e2e deps
-      - run: yarn install --frozen-lockfile
+      # 3. Install dependencies (only e2e)
       - run: cd e2e && yarn install --frozen-lockfile
+
+      # 3.5. Generate .env file for docker-compose
+      - name: Create .env file
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+          echo "USER_DB_NAME=${{ secrets.USER_DB_NAME }}" >> .env
+          echo "USER_DB_PORT=${{ secrets.USER_DB_PORT }}" >> .env
+          echo "TODO_DB_NAME=${{ secrets.TODO_DB_NAME }}" >> .env
+          echo "TODO_DB_PORT=${{ secrets.TODO_DB_PORT }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
       # 4. Start services with docker-compose
       - name: Start services
         run: docker compose up -d --build
-        env:
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASS: ${{ secrets.DB_PASS }}
-          USER_DB_NAME: ${{ secrets.USER_DB_NAME }}
-          USER_DB_PORT: ${{ secrets.USER_DB_PORT }}
-          TODO_DB_NAME: ${{ secrets.TODO_DB_NAME }}
-          TODO_DB_PORT: ${{ secrets.TODO_DB_PORT }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
-      # Debugging helpers
       - run: docker ps -a
       - run: docker compose logs --tail=100
 
       # 5. Install Playwright browsers
       - run: cd e2e && npx playwright install --with-deps
 
-      # 6. Wait for services (increased to 3 min for slow starts)
+      # 6. Wait for services
       - name: Wait for API & Client
-        run: npx wait-on --timeout 180000 http://localhost:3000 http://localhost:5000 http://localhost:5001
+        run: npx wait-on --timeout 120000 http://localhost:3000 http://localhost:5000 http://localhost:5001
 
       # 7. Run tests
       - run: cd e2e && yarn test --reporter=dot
