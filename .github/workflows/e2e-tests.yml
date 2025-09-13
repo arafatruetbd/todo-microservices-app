@@ -1,0 +1,51 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      # 1. Checkout repo
+      - uses: actions/checkout@v4
+
+      # 2. Set up Node.js (for Playwright & frontend)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # 3. Install dependencies (root + e2e)
+      - run: yarn install --frozen-lockfile
+      - run: cd e2e && yarn install --frozen-lockfile
+
+      # 4. Start services with docker-compose
+      - run: docker-compose up -d
+      - run: docker ps -a
+
+      # 5. Install Playwright browsers
+      - run: cd e2e && npx playwright install --with-deps
+
+      # 6. Wait for services to be ready
+      - name: Wait for API & Client
+        run: |
+          npx wait-on http://localhost:3000 http://localhost:5000 http://localhost:5001
+
+      # 7. Run tests
+      - run: cd e2e && yarn test --reporter=dot

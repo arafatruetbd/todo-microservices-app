@@ -2,6 +2,7 @@
 client/node_modules/
 user-service/node_modules/
 todo-service/node_modules/
+e2e/node_modules/
 
 # Ignore all coverage folders anywhere in the project
 coverage/
