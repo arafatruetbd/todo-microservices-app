@@ -9,19 +9,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        ports: ["5432:5432"]
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
       # 1. Checkout repo
       - uses: actions/checkout@v4
@@ -36,7 +23,7 @@ jobs:
       - run: cd e2e && yarn install --frozen-lockfile
 
       # 4. Start services with docker-compose
-      - run: docker compose up -d
+      - run: docker compose up -d --build
       - run: docker ps -a
 
       # 5. Install Playwright browsers
@@ -49,3 +36,8 @@ jobs:
 
       # 7. Run tests
       - run: cd e2e && yarn test --reporter=dot
+
+      # 8. Always show container logs if something fails
+      - name: Show docker logs
+        if: failure()
+        run: docker compose logs
