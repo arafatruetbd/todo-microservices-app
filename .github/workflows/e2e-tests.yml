@@ -13,31 +13,36 @@ jobs:
       # 1. Checkout repo
       - uses: actions/checkout@v4
 
-      # 2. Set up Node.js (for Playwright & frontend)
+      # 2. Set up Node.js
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20 # required for Vite build
 
       # 3. Install dependencies (root + e2e)
       - run: yarn install --frozen-lockfile
       - run: cd e2e && yarn install --frozen-lockfile
 
       # 4. Start services with docker-compose
-      - run: docker compose up -d --build
+      - name: Start services
+        run: docker compose up -d --build
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          USER_DB_NAME: ${{ secrets.USER_DB_NAME }}
+          USER_DB_PORT: ${{ secrets.USER_DB_PORT }}
+          TODO_DB_NAME: ${{ secrets.TODO_DB_NAME }}
+          TODO_DB_PORT: ${{ secrets.TODO_DB_PORT }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
       - run: docker ps -a
 
       # 5. Install Playwright browsers
       - run: cd e2e && npx playwright install --with-deps
 
-      # 6. Wait for services to be ready
+      # 6. Wait for services
       - name: Wait for API & Client
         run: |
           npx wait-on http://localhost:3000 http://localhost:5000 http://localhost:5001
 
       # 7. Run tests
       - run: cd e2e && yarn test --reporter=dot
-
-      # 8. Always show container logs if something fails
-      - name: Show docker logs
-        if: failure()
-        run: docker compose logs
