@@ -36,7 +36,7 @@ jobs:
       - run: cd e2e && yarn install --frozen-lockfile
 
       # 4. Start services with docker-compose
-      - run: docker-compose up -d
+      - run: docker compose up -d
       - run: docker ps -a
 
       # 5. Install Playwright browsers
