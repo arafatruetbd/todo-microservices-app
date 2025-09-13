@@ -13,42 +13,35 @@ jobs:
       # 1. Checkout repo
       - uses: actions/checkout@v4
 
-      # 2. Set up Node.js (20+ needed for Vite)
+      # 2. Set up Node.js (for Playwright & frontend tests)
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "yarn"
 
-      # 3. Install dependencies (root + e2e)
-      - run: yarn install --frozen-lockfile
+      # 3. Install dependencies (only e2e)
       - run: cd e2e && yarn install --frozen-lockfile
 
       # 4. Start services with docker-compose
       - name: Start services
         run: docker compose up -d --build
         env:
-          DB_USER: ${{ secrets.DB_USER || 'postgres' }}
-          DB_PASS: ${{ secrets.DB_PASS || 'postgres' }}
-          USER_DB_NAME: ${{ secrets.USER_DB_NAME || 'userdb' }}
-          USER_DB_PORT: ${{ secrets.USER_DB_PORT || '5432' }}
-          TODO_DB_NAME: ${{ secrets.TODO_DB_NAME || 'tododb' }}
-          TODO_DB_PORT: ${{ secrets.TODO_DB_PORT || '5432' }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET || 'supersecret' }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          USER_DB_NAME: ${{ secrets.USER_DB_NAME }}
+          USER_DB_PORT: ${{ secrets.USER_DB_PORT }}
+          TODO_DB_NAME: ${{ secrets.TODO_DB_NAME }}
+          TODO_DB_PORT: ${{ secrets.TODO_DB_PORT }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
-      # 5. Debug services status
-      - run: docker compose ps
+      - run: docker ps -a
       - run: docker compose logs --tail=100
 
-      # 6. Install Playwright browsers
+      # 5. Install Playwright browsers
       - run: cd e2e && npx playwright install --with-deps
 
-      # 7. Wait for services (fail fast if not ready)
+      # 6. Wait for services
       - name: Wait for API & Client
-        run: |
-          npx wait-on --timeout 60000 --interval 2000 \
-            http://localhost:3000 \
-            http://localhost:5000 \
-            http://localhost:5001
+        run: npx wait-on --timeout 90000 http://localhost:3000 http://localhost:5000 http://localhost:5001
 
-      # 8. Run tests
+      # 7. Run tests
       - run: cd e2e && yarn test --reporter=dot
