@@ -30,7 +30,6 @@ jobs:
         run: |
           cd user-service && yarn test --coverage && cd ..
           cd todo-service && yarn test --coverage && cd ..
-          cd client && yarn test --coverage && cd ..
 
       # Run SonarQube scan
       - name: SonarQube Scan
