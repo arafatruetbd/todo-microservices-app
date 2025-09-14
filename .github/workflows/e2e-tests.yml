@@ -105,7 +105,24 @@ jobs:
       - name: Run Playwright tests
         run: cd e2e && yarn test --reporter=dot
 
-      # 14. Upload Playwright HTML report (artifact)
+      # 14. Run backend unit tests with coverage
+      - name: Run backend tests with coverage
+        run: |
+          cd user-service && yarn install && yarn test --coverage
+          cd ../todo-service && yarn install && yarn test --coverage
+
+      # 15. Upload coverage reports
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            user-service/coverage
+            todo-service/coverage
+          retention-days: 7
+
+      # 16. Upload Playwright HTML report (artifact)
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
