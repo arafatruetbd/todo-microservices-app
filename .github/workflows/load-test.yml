@@ -53,7 +53,9 @@ jobs:
       - name: Run k6 load test
         run: |
           mkdir -p reports
+          chmod 777 reports  # make sure it's writable
           docker run --rm --network host \
+            -u $(id -u):$(id -g) \
             -v ${{ github.workspace }}/e2e/dist:/scripts \
             -v ${{ github.workspace }}/reports:/reports \
             grafana/k6 run --out json=/reports/result.json /scripts/load-test.js
