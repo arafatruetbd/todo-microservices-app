@@ -13,7 +13,7 @@ jobs:
       # 1. Checkout repo
       - uses: actions/checkout@v4
 
-      # 2. Set up Node.js (for Playwright & frontend tests)
+      # 2. Set up Node.js (for Playwright & frontend tests later)
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -44,12 +44,32 @@ jobs:
       - name: Docker logs
         run: docker compose logs --tail=200 user-service todo-service frontend
 
-      # 5. Install Playwright browsers
-      - run: cd e2e && npx playwright install --with-deps
-
-      # 6. Wait for services
+      # 5. Healthcheck loop for APIs & frontend
       - name: Wait for API & Client
         run: |
-          npx wait-on --timeout 30000 http://localhost:3000 http://localhost:5000 http://localhost:5001
-          exit 0  # 👈 stops here, marks job as successful
+          for i in {1..30}; do
+            echo "⏳ Checking user-service... attempt $i"
+            if curl -sSf http://localhost:5000/health > /dev/null; then
+              echo "✅ user-service ready"
+              break
+            fi
+            sleep 5
+          done
 
+          for i in {1..30}; do
+            echo "⏳ Checking todo-service... attempt $i"
+            if curl -sSf http://localhost:5001/health > /dev/null; then
+              echo "✅ todo-service ready"
+              break
+            fi
+            sleep 5
+          done
+
+          for i in {1..30}; do
+            echo "⏳ Checking frontend... attempt $i"
+            if curl -sSf http://localhost:3000 > /dev/null; then
+              echo "✅ frontend ready"
+              break
+            fi
+            sleep 5
+          done
