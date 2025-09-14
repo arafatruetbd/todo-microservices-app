@@ -1,7 +1,7 @@
 name: Load Test
 
 on:
-  push:
+  push: # run only when pushing
     branches: [master]
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 20
 
-      # 3. Install deps (for building load-test)
+      # 3. Install deps (just for building load-test)
       - name: Install dependencies
         run: cd e2e && yarn install --frozen-lockfile
 
@@ -49,27 +49,9 @@ jobs:
       - name: Build load test
         run: cd e2e && yarn build:load
 
-      # 8. Run k6 load test + save report
+      # 8. Run load test with k6 (via Docker, same network as services)
       - name: Run k6 load test
         run: |
-          mkdir -p reports
-          chmod 777 reports  # make sure it's writable
           docker run --rm --network host \
-            -u $(id -u):$(id -g) \
             -v ${{ github.workspace }}/e2e/dist:/scripts \
-            -v ${{ github.workspace }}/reports:/reports \
-            grafana/k6 run --out json=/reports/result.json /scripts/load-test.js
-
-      # 9. Convert JSON to HTML report
-      - name: Generate k6 HTML report
-        run: |
-          npx k6-reporter --json reports/result.json --output reports/load-report.html
-
-      # 10. Upload load test report
-      - name: Upload load test report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: k6-load-report
-          path: reports/load-report.html
-          retention-days: 7
+            grafana/k6 run /scripts/load-test.js
