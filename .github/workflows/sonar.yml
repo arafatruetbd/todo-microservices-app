@@ -32,14 +32,15 @@ jobs:
           cd todo-service && yarn test --coverage && cd ..
 
       # Run SonarQube scan
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@master
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
         with:
           args: >
             -Dsonar.projectKey=todo-microservices-app
+            -Dsonar.organization=your-org
             -Dsonar.sources=user-service/src,todo-service/src,client/src
-            -Dsonar.tests=user-service/tests,todo-service/tests,client/tests
-            -Dsonar.javascript.lcov.reportPaths=user-service/coverage/lcov.info,todo-service/coverage/lcov.info,client/coverage/lcov.info
+            -Dsonar.tests=user-service/src/tests,todo-service/src/tests
+            -Dsonar.javascript.lcov.reportPaths=user-service/coverage/lcov.info,todo-service/coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
