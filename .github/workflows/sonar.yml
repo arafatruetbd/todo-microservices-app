@@ -2,8 +2,10 @@ name: SonarQube Analysis
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
   pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   sonar:
@@ -12,35 +14,27 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # important for PR analysis
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # Install deps for each service
       - name: Install deps
         run: |
           cd user-service && yarn install --frozen-lockfile && cd ..
           cd todo-service && yarn install --frozen-lockfile && cd ..
           cd client && yarn install --frozen-lockfile && cd ..
 
-      # Run tests with coverage
       - name: Run service tests
         run: |
           cd user-service && yarn test --coverage && cd ..
           cd todo-service && yarn test --coverage && cd ..
 
-      # Run SonarQube scan
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        with:
-          args: >
-            -Dsonar.projectKey=todo-microservices-app
-            -Dsonar.organization=your-org
-            -Dsonar.sources=user-service/src,todo-service/src,client/src
-            -Dsonar.tests=user-service/src/tests,todo-service/src/tests
-            -Dsonar.javascript.lcov.reportPaths=user-service/coverage/lcov.info,todo-service/coverage/lcov.info
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
