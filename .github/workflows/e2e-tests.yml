@@ -47,9 +47,13 @@ jobs:
       # 5. Install Playwright browsers
       - run: cd e2e && npx playwright install --with-deps
 
-      # 6. Wait for services
+      # 6. Wait for services with retries
       - name: Wait for API & Client
-        run: npx wait-on --timeout 120000 http://localhost:3000 http://localhost:5000 http://localhost:5001
+        run: |
+          npx wait-on --timeout 120000 \
+          http://localhost:3000/ \
+          http://localhost:5000/health \
+          http://localhost:5001/health
 
       # If wait-on fails, dump logs before failing the job
       - name: Dump logs on failure
