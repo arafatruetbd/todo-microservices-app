@@ -3,14 +3,14 @@ import "reflect-metadata";
 import { AppDataSource } from "./config/db";
 import app from "./app";
 
-const PORT = Number(process.env.PORT) || 5001;
+const PORT = process.env.PORT || 5001;
 
 // ✅ Connect to DB and Start Server
 AppDataSource.initialize()
   .then(() => {
     console.log("✅ Connected to Todo DB");
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Todo service running on http://0.0.0.0:${PORT}`);
+    app.listen(PORT, () => {
+      console.log(`🚀 Todo service running on http://localhost:${PORT}`);
     });
   })
   .catch((error) => {

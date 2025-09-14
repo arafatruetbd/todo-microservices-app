@@ -3,13 +3,13 @@ import "reflect-metadata";
 import { AppDataSource } from "./config/db";
 import app from "./app";
 
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = process.env.PORT || 5000;
 
 // ✅ Connect to DB and Start Server
 AppDataSource.initialize()
   .then(() => {
     console.log("✅ Connected to User DB");
-    app.listen(PORT, "0.0.0.0", () => {
+    app.listen(PORT, () => {
       console.log(`🚀 User service running on http://localhost:${PORT}`);
     });
   })
