@@ -1,0 +1,46 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Install deps for each service
+      - name: Install deps
+        run: |
+          cd user-service && yarn install --frozen-lockfile && cd ..
+          cd todo-service && yarn install --frozen-lockfile && cd ..
+          cd client && yarn install --frozen-lockfile && cd ..
+
+      # Run tests with coverage
+      - name: Run service tests
+        run: |
+          cd user-service && yarn test --coverage && cd ..
+          cd todo-service && yarn test --coverage && cd ..
+          cd client && yarn test --coverage && cd ..
+
+      # Run SonarQube scan
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.projectKey=todo-microservices-app
+            -Dsonar.sources=user-service/src,todo-service/src,client/src
+            -Dsonar.tests=user-service/tests,todo-service/tests,client/tests
+            -Dsonar.javascript.lcov.reportPaths=user-service/coverage/lcov.info,todo-service/coverage/lcov.info,client/coverage/lcov.info
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
