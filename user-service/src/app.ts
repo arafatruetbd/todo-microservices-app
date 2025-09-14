@@ -15,6 +15,10 @@ app.use(
 );
 app.use(express.json());
 
+// ✅ Add health check endpoint
+app.get("/health", (_req, res) => {
+  res.status(200).send("OK");
+});
 // ✅ Routes
 app.use("/user/api/auth", authRoutes);
 // centralized error handling middleware comes last
