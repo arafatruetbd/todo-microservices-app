@@ -1,0 +1,57 @@
+name: Load Test
+
+on:
+  push:            # run only when pushing
+    branches: [master]
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2. Set up Node.js for TypeScript build
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3. Install deps (just for building load-test)
+      - name: Install dependencies
+        run: cd e2e && yarn install --frozen-lockfile
+
+      # 4. Create .env for docker-compose
+      - name: Create .env file
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+          echo "USER_DB_NAME=${{ secrets.USER_DB_NAME }}" >> .env
+          echo "USER_DB_PORT=${{ secrets.USER_DB_PORT }}" >> .env
+          echo "TODO_DB_NAME=${{ secrets.TODO_DB_NAME }}" >> .env
+          echo "TODO_DB_PORT=${{ secrets.TODO_DB_PORT }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+
+      # 5. Start services
+      - name: Start services
+        run: docker compose up -d --build
+
+      # 6. Wait until services are ready
+      - name: Wait for services
+        run: |
+          npx wait-on --timeout 120000 \
+            http://localhost:5000/health \
+            http://localhost:5001/health
+
+      # 7. Build the load test (TS → JS)
+      - name: Build load test
+        run: cd e2e && yarn build:load
+
+      # 8. Run load test with k6 (via Docker, same network as services)
+      - name: Run k6 load test
+        run: |
+          docker run --rm --network host \
+            -v ${{ github.workspace }}/e2e/dist:/scripts \
+            grafana/k6 run /scripts/load-test.js
