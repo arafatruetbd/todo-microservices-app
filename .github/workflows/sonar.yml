@@ -33,6 +33,10 @@ jobs:
           cd user-service && yarn test --coverage && cd ..
           cd todo-service && yarn test --coverage && cd ..
 
+      - name: Run client tests
+        run: |
+          cd client && yarn test:coverage && cd ..
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:

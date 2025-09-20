@@ -1,32 +1,35 @@
 # client/Dockerfile
 
-# Stage 1 — build with Node
-FROM node:18 AS builder
+# ---------- Stage 1: Build ----------
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy lockfile/package.json first for caching
-COPY package.json package-lock.json* ./
+# Enable corepack to use Yarn
+RUN corepack enable
 
-# Use npm ci if package-lock.json exists for deterministic install
-RUN if [ -f package-lock.json ]; then npm ci --silent; else npm install --silent; fi
+# Copy dependency files
+COPY package.json yarn.lock ./
 
+# Install dependencies (prod + dev) for build
+RUN yarn install --frozen-lockfile
+
+# Copy source files
 COPY . .
 
-# Build (Vite's default output dir is "dist")
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-RUN npm run build
+# Build the Vite app (outputs to /app/dist by default)
+ENV NODE_ENV=production
+RUN yarn build
 
-# Stage 2 — serve with nginx
+# ---------- Stage 2: Runtime ----------
 FROM nginx:alpine AS runner
 
-# Remove default content
+# Remove default nginx html
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy nginx config
+# Copy custom nginx config
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Copy build output from builder (Vite output default: /app/dist)
+# Copy built frontend
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
