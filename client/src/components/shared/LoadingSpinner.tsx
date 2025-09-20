@@ -16,9 +16,14 @@
  */
 export default function LoadingSpinner() {
   return (
-    <div className="flex items-center justify-center min-h-[200px] w-full">
-      {/* The spinning circle */}
-      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-500"></div>
+    <div
+      data-testid="spinner-container"
+      className="flex items-center justify-center min-h-[200px] w-full"
+    >
+      <div
+        data-testid="spinner-circle"
+        className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-500"
+      ></div>
     </div>
   );
 }
